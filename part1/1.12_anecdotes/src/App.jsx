@@ -43,7 +43,7 @@ const App = () => {
     determineHighestVoted(copy)
   }
 
-  const nextAnectdote = () => {
+  const nextAnecdote = () => {
     let random = selected;
 
     do {
@@ -63,10 +63,12 @@ const App = () => {
     
   return (
     <>
+    <h1>Anecdote of the day</h1>
     <Anecdote anecdotes={anecdotes} votes={votes} selected={selected}/>
     <button onClick={voteAnecdote}>vote</button>
-    <button onClick={nextAnectdote}>next anectode</button>
+    <button onClick={nextAnecdote}>next anecdote</button>
     <br/>
+    <h1>Anecdote with most votes</h1>
     <Anecdote anecdotes={anecdotes} votes={votes} selected={highest}/>
     </>
   )
