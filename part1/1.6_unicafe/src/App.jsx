@@ -6,12 +6,16 @@ const Statistics = ({good,neutral,bad,all,average,positive}) => {
       return(
       <>
       <h1>statistics</h1>  
-      <StatisticLine text="good" value={good}></StatisticLine>
-      <StatisticLine text="neutral" value={neutral}></StatisticLine>
-      <StatisticLine text="bad" value={bad}></StatisticLine>
-      <StatisticLine text="all" value={all}></StatisticLine>
-      <StatisticLine text="average" value={average}></StatisticLine>
-      <StatisticLine text="positive" value={positive + ' %'}></StatisticLine>
+      <table>
+        <tbody>
+          <StatisticLine text="good" value={good}></StatisticLine>
+          <StatisticLine text="neutral" value={neutral}></StatisticLine>
+          <StatisticLine text="bad" value={bad}></StatisticLine>
+          <StatisticLine text="all" value={all}></StatisticLine>
+          <StatisticLine text="average" value={average}></StatisticLine>
+          <StatisticLine text="positive" value={positive + ' %'}></StatisticLine>
+        </tbody>
+      </table>
       </>
       )
 
@@ -36,7 +40,10 @@ const Button = (props) => {
 const StatisticLine = (props) => {
   return (
     <>
-    <p>{props.text} {props.value}</p>
+    <tr>
+          <td>{props.text}</td>
+          <td>{props.value}</td>
+    </tr>
     </>
   )
 }
