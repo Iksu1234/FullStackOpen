@@ -34,7 +34,7 @@ const Persons = ({searchResults}) => {
   return(
     <>
       {searchResults.map(person => 
-      <Person person={person}></Person>
+      <Person key={person.id} person={person}></Person>
       )}
     </>
   )
