@@ -15,18 +15,32 @@ const App = () => {
   const addName = (event) => {
     event.preventDefault()
     const newPerson = {name: newName}
+    const result = checkForIdenticalName()
+    console.log(result)
+
+    if (!result) {
     setPersons(persons.concat(newPerson))
     setNewName('')
-
     console.log('add new name:', newName)
     console.log('persons:', persons)
+    }
+    else {
+    alert(`Phonebook already contains the name ${newName} `)
+    }
+  }
+
+  const checkForIdenticalName = () => {
+    if (persons.some(e => e.name === newName)) {
+      return true
+    }
+    return false
   }
 
   const handleNumberChange = (event) => {
     console.log(event.target.value)
     setNewName(event.target.value)
   }
-
+  
   return (
     <div>
       <h2>Phonebook</h2>
