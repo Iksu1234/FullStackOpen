@@ -1,21 +1,21 @@
 import { useState } from 'react'
 
-const Number = ({name}) => {
-  return(
-    <>
-    <p>{name}</p>
-    </>
-  )
-}
 
 const App = () => {
-  const [persons, setPersons] = useState([{ name: 'Arto Hellas', number:  '040-123123' }]) 
+  const [persons, setPersons] = useState([ 
+    { name: 'Arto Hellas', number: '040-123456', id: 1 },
+    { name: 'Ada Lovelace', number: '39-44-5323523', id: 2 },
+    { name: 'Dan Abramov', number: '12-43-234345', id: 3 },
+    { name: 'Mary Poppendieck', number: '39-23-6423122', id: 4 }]) 
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
+  const [searchField, setSearchField] = useState('')
+  const [searchResults, setSearchResults] = useState(persons)
 
-  const addName = (event) => {
+  const addPerson = (event) => {
     event.preventDefault()
-    const newPerson = {name: newName, number: newNumber}
+    const id = persons.length + 1
+    const newPerson = {name: newName, number: newNumber, id: id }
     const result = checkForIdenticalName()
     console.log(result)
 
@@ -23,7 +23,8 @@ const App = () => {
     setPersons(persons.concat(newPerson))
     setNewName('')
     setNewNumber('')
-    console.log(`add new record: ${newName} ${newNumber} `)
+    console.log(`add new record: ${newName} ${newNumber} with id ${id} `)
+    setSearchResults(persons.concat(newPerson))
     }
     else {
     alert(`Phonebook already contains the name ${newName} `)
@@ -40,14 +41,30 @@ const App = () => {
   const handleNameChange = (event) => {
     setNewName(event.target.value)
   }
+
   const handleNumberChange = (event) => {
   setNewNumber(event.target.value)
   }
+
+  const handleSearchChange = (event) => {
   
+  setSearchField(event.target.value)
+  
+  if (event.target.value === "") {
+    setSearchResults(persons)
+  }
+  else {
+    const result = persons.filter((person) => person.name.toLowerCase().includes(event.target.value.toLowerCase()))
+    setSearchResults(result)
+  }
+  }
+
   return (
     <div>
       <h2>Phonebook</h2>
-      <form onSubmit={addName}>
+      <div>filter shown with <input value={searchField} onChange={handleSearchChange}></input></div>
+      <h2>add a new</h2>
+      <form onSubmit={addPerson}>
         <div>
           name: 
           <input value={newName} onChange={handleNameChange}/>
@@ -61,8 +78,8 @@ const App = () => {
         </div>
       </form>
       <h2>Numbers</h2>
-        {persons.map(person => 
-        <p key={person.name}>{person.name} {person.number}</p>
+        {searchResults.map(person => 
+        <p key={person.id}>{person.name} {person.number}</p>
         )}
     </div>
   )
