@@ -13,6 +13,7 @@ const App = () => {
   const [searchField, setSearchField] = useState('')
   const [searchResults, setSearchResults] = useState([])
   const [notificationMessage, setNotificationMessage] = useState(null)
+  const [onError, setOnError] = useState(false)
 
   useEffect(() => {
   console.log('get')
@@ -36,25 +37,28 @@ const App = () => {
     console.log("id:", id);
     const newPerson = {name: newName, number: newNumber, id: id }
 
-    setPersons(persons.concat(newPerson))
-    setNewName('')
-    setNewNumber('')
-    console.log(`add new record: ${newName} ${newNumber} with id ${id} `)
-
     personService
       .create(newPerson)
       .then(returnedPerson => {
+
         console.log("response: ", returnedPerson);
-      })  
-    setSearchResults(persons.concat(newPerson))
 
-    setNotificationMessage(
-    `added: ${newName}`
-    )
-    setTimeout(() => {
-      setNotificationMessage(null)
-    }, 3000)
+        setPersons(persons.concat(newPerson))
+        setNewName('')
+        setNewNumber('')
+        setSearchResults(persons.concat(newPerson))
 
+        console.log(`add new record: ${newName} ${newNumber} with id ${id} `)
+        setNotificationMessage(
+          `added: ${newName}`
+          )
+        setTimeout(() => {
+          setNotificationMessage(null)
+        }, 3000)
+      })
+      .catch(error => {
+        console.log("error message: ", error);      
+      })
     }   
     else {
 
@@ -81,8 +85,7 @@ const App = () => {
           .update(arrayPerson.id ,newPerson)
           .then(response => {
           console.log("response: ", response);
-          }) 
-
+          
           setPersons(newPersons)
           setSearchResults(newPersons)
           setNewName('')
@@ -94,12 +97,22 @@ const App = () => {
           setTimeout(() => {
             setNotificationMessage(null)
           }, 3000)
+          })
 
+          .catch(error => {
+          console.log("error message: ", error);  
+
+          setOnError(true)
+          setNotificationMessage(
+            `${newName} not found on the server`
+          )
+          setTimeout(() => {
+            setNotificationMessage(null)
+            setOnError(false)
+          }, 3000)
+ 
+          })
         }})}
-
-      else{
-          console.log("update error");     
-        }
       }
   }
 
@@ -125,16 +138,30 @@ const App = () => {
           
           setPersons(newPersons)
           setSearchResults(newPersons)
+
+          setNotificationMessage(
+            `${person.name} deleted`
+          )
+          setTimeout(() => {
+            setNotificationMessage(null)
+          }, 3000)
         }
         else{
           console.log("delete error");     
         }
       });
-
       })
       .catch(error => {
-        console.log(error);
-        throw error
+        console.log("delete error: ", error);
+
+        setOnError(true)
+        setNotificationMessage(
+            `${person.name} has already been deleted from the server`
+          )
+          setTimeout(() => {
+            setNotificationMessage(null)
+            setOnError(false)
+          }, 3000)
       })
     }
   }
@@ -170,7 +197,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      <Notification message={notificationMessage}></Notification>
+      <Notification message={notificationMessage} error={onError}></Notification>
       <Filter searchField={searchField} onChange={handleSearchChange}/>
       <h2>add a new</h2>
       <PersonForm addPerson={addPerson} newName={newName} newNumber={newNumber} 
