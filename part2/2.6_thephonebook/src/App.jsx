@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
+import personService from './services/persons'
 
 const Filter = ({searchField, onChange}) => {
   return(
@@ -31,20 +32,26 @@ const PersonForm = ({addPerson, newName, newNumber, handleNameChange, handleNumb
   )
 }
 
-const Persons = ({searchResults}) => {
+const Persons = ({searchResults, onDelete}) => {
   return(
     <>
       {searchResults.map(person => 
-      <Person key={person.id} person={person}></Person>
+      <Person key={person.id} person={person} onDelete={onDelete}></Person>
       )}
     </>
   )
 }
 
-const Person = ({person}) => {
+const Person = ({person, onDelete}) => {
+
+  const handleDeleteClick = (event) => {
+    event.preventDefault()
+    onDelete(person)
+  }
+
   return(
     <>
-    <p key={person.id}>{person.name} {person.number}</p>
+    <p key={person.id}>{person.name} {person.number} <button onClick={handleDeleteClick}>delete</button></p> 
     </>
   )
 }
@@ -57,34 +64,111 @@ const App = () => {
   const [searchResults, setSearchResults] = useState([])
 
   useEffect(() => {
-  console.log('effect')
-  axios
-    .get('http://localhost:3001/persons')
-    .then(response => {
-      console.log('promise fulfilled')
-      setPersons(response.data)
-      setSearchResults(response.data)
-    })
-}, [])
+  console.log('get')
 
+  personService
+    .getAll()
+    .then(initialPersons => {
+      setPersons(initialPersons)
+      setSearchResults(initialPersons)
+    })
+  }, [])
 
   const addPerson = (event) => {
     event.preventDefault()
-    const id = persons.length + 1
-    const newPerson = {name: newName, number: newNumber, id: id }
+
     const result = checkForIdenticalName()
-    console.log(result)
 
     if (!result) {
+
+    const id = (persons.length + 1).toString()
+    console.log("id:", id);
+    const newPerson = {name: newName, number: newNumber, id: id }
+
     setPersons(persons.concat(newPerson))
     setNewName('')
     setNewNumber('')
     console.log(`add new record: ${newName} ${newNumber} with id ${id} `)
+
+    personService
+      .create(newPerson)
+      .then(returnedPerson => {
+        console.log("response: ", returnedPerson);
+      })  
     setSearchResults(persons.concat(newPerson))
-    }
-    
+    }   
     else {
-    alert(`Phonebook already contains the name ${newName} `)
+
+    const confirmCheck = window.confirm(`${newName} is already added to the phonebook,
+    replace the old number with a new one?`)
+
+    if (confirmCheck) {
+
+      persons.forEach(arrayPerson => {
+        if (arrayPerson.name.toLowerCase() === newName.toLowerCase()) {
+
+          console.log("1: ",arrayPerson.name);
+          console.log("2: ",newName);
+          const index = persons.indexOf(arrayPerson)
+          console.log("person to update: ",persons[index]);
+
+          const newPerson = {name: arrayPerson.name, number: newNumber, id: arrayPerson.id }
+
+          let newPersons = [...persons]
+          newPersons[index] = newPerson
+          console.log("newPersons:", newPersons);
+          
+          personService
+          .update(arrayPerson.id ,newPerson)
+          .then(response => {
+          console.log("response: ", response);
+          }) 
+
+          setPersons(newPersons)
+          setSearchResults(newPersons)
+          setNewName('')
+          setNewNumber('')
+        }})}
+
+      else{
+          console.log("update error");     
+        }
+      }
+  }
+
+  const deletePerson = (person) => {
+
+    const result = window.confirm(`Delete ${person.name} ?`)
+
+    if (result) {
+      personService
+      .remove(person.id)
+      .then(response => {
+      console.log("response: ", response);
+      
+      persons.forEach(arrayPerson => {
+        if (arrayPerson.id === person.id) {
+          console.log("1: ",arrayPerson.id);
+          console.log("2: ",person.id);
+          const index = persons.indexOf(arrayPerson)
+          console.log("index to delete: ",index);
+          
+          const newPersons = persons.toSpliced(index,1)
+          console.log("newpersons:", newPersons);
+          
+          setPersons(newPersons)
+          setSearchResults(newPersons)
+        }
+        else{
+          console.log("delete error");     
+        }
+      });
+
+      })
+      .catch(error => {
+        console.log(error);
+        throw error
+      })
     }
   }
 
@@ -124,7 +208,7 @@ const App = () => {
       <PersonForm addPerson={addPerson} newName={newName} newNumber={newNumber} 
       handleNameChange={handleNameChange} handleNumberChange={handleNumberChange}/>
       <h2>Numbers</h2>
-      <Persons searchResults={searchResults}/>
+      <Persons searchResults={searchResults} onDelete={deletePerson} />
     </div>
   )
 }
