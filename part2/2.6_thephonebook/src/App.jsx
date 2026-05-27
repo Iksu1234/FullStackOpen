@@ -1,60 +1,10 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 import personService from './services/persons'
-
-const Filter = ({searchField, onChange}) => {
-  return(
-    <>
-    <div>filter shown with 
-      <input value={searchField} onChange={onChange}/>
-    </div>
-    </>
-  )
-}
-
-const PersonForm = ({addPerson, newName, newNumber, handleNameChange, handleNumberChange}) => {
-  return(
-    <>
-    <form onSubmit={addPerson}>
-        <div>
-          name: 
-          <input value={newName} onChange={handleNameChange}/>
-        </div>
-        <div>
-          number:
-          <input value={newNumber} onChange={handleNumberChange}/>
-        </div>
-        <div>
-          <button type="submit">add</button>
-        </div>
-    </form>
-    </>
-  )
-}
-
-const Persons = ({searchResults, onDelete}) => {
-  return(
-    <>
-      {searchResults.map(person => 
-      <Person key={person.id} person={person} onDelete={onDelete}></Person>
-      )}
-    </>
-  )
-}
-
-const Person = ({person, onDelete}) => {
-
-  const handleDeleteClick = (event) => {
-    event.preventDefault()
-    onDelete(person)
-  }
-
-  return(
-    <>
-    <p key={person.id}>{person.name} {person.number} <button onClick={handleDeleteClick}>delete</button></p> 
-    </>
-  )
-}
+import Filter from './components/Filter'
+import Persons from './components/Persons'
+import PersonForm from './components/PersonForm'
+import Notification from './components/Notification'
 
 const App = () => {
   const [persons, setPersons] = useState([]) 
@@ -62,6 +12,7 @@ const App = () => {
   const [newNumber, setNewNumber] = useState('')
   const [searchField, setSearchField] = useState('')
   const [searchResults, setSearchResults] = useState([])
+  const [notificationMessage, setNotificationMessage] = useState(null)
 
   useEffect(() => {
   console.log('get')
@@ -96,6 +47,14 @@ const App = () => {
         console.log("response: ", returnedPerson);
       })  
     setSearchResults(persons.concat(newPerson))
+
+    setNotificationMessage(
+    `added: ${newName}`
+    )
+    setTimeout(() => {
+      setNotificationMessage(null)
+    }, 3000)
+
     }   
     else {
 
@@ -128,6 +87,14 @@ const App = () => {
           setSearchResults(newPersons)
           setNewName('')
           setNewNumber('')
+
+          setNotificationMessage(
+            `edited: ${newName}`
+          )
+          setTimeout(() => {
+            setNotificationMessage(null)
+          }, 3000)
+
         }})}
 
       else{
@@ -203,6 +170,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={notificationMessage}></Notification>
       <Filter searchField={searchField} onChange={handleSearchChange}/>
       <h2>add a new</h2>
       <PersonForm addPerson={addPerson} newName={newName} newNumber={newNumber} 
