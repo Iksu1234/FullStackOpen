@@ -189,7 +189,8 @@ const App = () => {
     setSearchResults(persons)
   }
   else {
-    const result = persons.filter((person) => person.name.toLowerCase().includes(event.target.value.toLowerCase()))
+    const result = persons.filter((person) => person.name.toLowerCase()
+    .includes(event.target.value.toLowerCase()))
     setSearchResults(result)
   }
   }

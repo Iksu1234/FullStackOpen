@@ -1,35 +1,38 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import finland from './finland'
 import axios from 'axios'
 
 const Filter = ({searchField, onChange}) => {
   return(
     <>
-    <div>find countries
-      <input value={searchField} onChange={onChange}/>
-    </div>
+    <div>find countries <input value={searchField} onChange={onChange}/></div>
     </>
   )
 }
 
-const Countries = ({searchResults, countryCount}) => {
-
-  return(
+const Countries = ({searchResults, countryCount, isSelected}) => {
+      return(
     <>
       {searchResults.map(country =>   
-      <Country key={country.name.common} country={country} countryCount={countryCount}></Country>
+      <Country key={country.name.common} country={country} 
+      countryCount={countryCount} isSelected={isSelected}></Country>
       )}
     </>
   )
 }
 
-const Country = ({country, countryCount}) => {
-  
+const Country = ({country, countryCount, isSelected}) => {
+
   let languages = []
   try {
   languages = Object.values(country.languages)
   } catch (error) {
     console.log("object value error on country: ",country.name.common );
+  }
+
+  const handleShowClick = (event) => {
+    event.preventDefault()
+    isSelected(country.ccn3)
   }
 
   if (countryCount == 1) {
@@ -50,7 +53,7 @@ const Country = ({country, countryCount}) => {
   else if (countryCount <= 10) {
     return(
       <>
-      <p>{country.name.common}</p>
+      <p>{country.name.common} <button onClick={handleShowClick}>Show</button></p>
       </>
     ) 
   }
@@ -65,6 +68,7 @@ function App() {
   const [searchField, setSearchField] = useState('')
   const [searchResults, setSearchResults] = useState([])
   const [alert, setAlert] = useState('')
+  const [isSelected, setIsSelected] = useState('')
 
   useEffect(() => {
     axios
@@ -77,6 +81,12 @@ function App() {
     })
   }, [])
   
+  const handleSelection = (ccn3) => {
+    const result = countries.filter((country) => country.ccn3 === ccn3)
+    setSearchResults(result)
+    setCountryCount(1)
+  }
+
   const handleSearchChange = (event) => {
   
   setSearchField(event.target.value)
@@ -84,7 +94,6 @@ function App() {
   if (event.target.value === "") {
     setSearchResults([])
     setAlert(null)
-    console.log("empty");
   }
   else {
     const result = countries.filter((country) => country.name.common.toLowerCase()
@@ -104,7 +113,8 @@ function App() {
     <>
       <Filter searchField={searchField} onChange={handleSearchChange}></Filter>
       <div>{alert}</div>
-      <Countries searchResults={searchResults} countryCount={countryCount}></Countries>
+      <Countries searchResults={searchResults} countryCount={countryCount} 
+      isSelected={handleSelection}></Countries>
     </>
   )
 }
