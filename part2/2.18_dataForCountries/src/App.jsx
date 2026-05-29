@@ -100,13 +100,11 @@ function App() {
   }, [])
 
   const getWeatherData = (target) => {
-    console.log("weatherData: ",target);
 
     axios
     .get(`http://api.openweathermap.org/data/2.5/weather?q=${target[0].capital},${target[0].cca2}&units=metric&APPID=${import.meta.env.VITE_OPENWEATHER_API_KEY}`)
     .then(response => {
       setWeatherData(response.data)  
-      console.log("weather response data: ",response.data);  
       })
     .catch(error => {
       console.log("Weather GET error: ", error);  
