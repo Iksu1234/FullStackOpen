@@ -1,7 +1,15 @@
 const express = require('express')
+const morgan = require('morgan')
+
 const app = express()
 
+
+
 app.use(express.json())
+
+morgan.token('post', (res) => JSON.stringify(res.body))
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :post'))
+
 
 let persons = [
     { 
@@ -25,7 +33,6 @@ let persons = [
       "number": "39-23-6423122"
     }
 ]
-
 
 app.get('/api/persons', (request, response) => {
   response.json(persons)
@@ -67,12 +74,10 @@ const checkName = (name) => {
         let result = false
         persons.forEach(person => {
         if (person.name.toLowerCase() == name.toLowerCase()){
-            console.log("name true")
             result = true
             return
         }
     });
-    console.log("name false")
     return result
 }
 
@@ -80,18 +85,15 @@ const checkNumber = (number) => {
     let result = false
     persons.forEach(person => {
         if (person.number == number){
-            console.log("number true")
             result = true
             return
         }
     });
-    console.log("number false")
     return result
 }
 
 app.post('/api/persons', (request, response) => {
   const body = request.body
-  console.log(body);
   
   if (!body.name || !body.number) {
     return response.status(400).json({ 
@@ -103,14 +105,12 @@ app.post('/api/persons', (request, response) => {
     return response.status(400).json({ 
       error: 'name must be unique' 
     })
-    console.log("name fail")
   }
 
   if (checkNumber(body.number)) {
     return response.status(400).json({ 
       error: 'number must be unique' 
     })
-    console.log("number fail")
   }
   
   const person = {
@@ -123,6 +123,7 @@ app.post('/api/persons', (request, response) => {
 
   response.json(person)
 })
+
   
 const PORT = 3001
 app.listen(PORT, () => {
