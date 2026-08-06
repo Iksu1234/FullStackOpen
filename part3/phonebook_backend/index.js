@@ -39,52 +39,91 @@ app.get('/info', (request, response) => {
 })
 
 
-/*
-app.get('/api/notes/:id', (request, response) => {
+app.get('/api/persons/:id', (request, response) => {
   const id = request.params.id
-  const note = notes.find(note => note.id === id)
+  const person = persons.find(note => note.id === id)
   
-  if (note) {
-    response.json(note)
+  if (person) {
+    response.json(person)
   } else {
     response.status(404).end()
   }
 })
 
-app.delete('/api/notes/:id', (request, response) => {
+
+app.delete('/api/persons/:id', (request, response) => {
   const id = request.params.id
-  notes = notes.filter(note => note.id !== id)
+  persons = persons.filter(person => person.id !== id)
 
   response.status(204).end()
 })
 
 const generateId = () => {
-  const maxId = notes.length > 0
-    ? Math.max(...notes.map(n => Number(n.id)))
-    : 0
-  return String(maxId + 1)
+    const id = Math.floor(Math.random() * 9000);
+    return id
 }
 
-app.post('/api/notes', (request, response) => {
-  const body = request.body
+const checkName = (name) => {
+        let result = false
+        persons.forEach(person => {
+        if (person.name.toLowerCase() == name.toLowerCase()){
+            console.log("name true")
+            result = true
+            return
+        }
+    });
+    console.log("name false")
+    return result
+}
 
-  if (!body.content) {
+const checkNumber = (number) => {
+    let result = false
+    persons.forEach(person => {
+        if (person.number == number){
+            console.log("number true")
+            result = true
+            return
+        }
+    });
+    console.log("number false")
+    return result
+}
+
+app.post('/api/persons', (request, response) => {
+  const body = request.body
+  console.log(body);
+  
+  if (!body.name || !body.number) {
     return response.status(400).json({ 
-      error: 'content missing' 
+      error: 'name and / or number is missing' 
     })
   }
 
-  const note = {
-    content: body.content,
-    important: body.important || false,
-    id: generateId(),
+  if (checkName(body.name)) {
+    return response.status(400).json({ 
+      error: 'name must be unique' 
+    })
+    console.log("name fail")
   }
 
-  notes = notes.concat(note)
+  if (checkNumber(body.number)) {
+    return response.status(400).json({ 
+      error: 'number must be unique' 
+    })
+    console.log("number fail")
+  }
+  
+  const person = {
+    id: generateId().toString(),
+    name: body.name,
+    number: body.number
+  }
 
-  response.json(note)
-})*/
+  persons = persons.concat(person)
 
+  response.json(person)
+})
+  
 const PORT = 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
