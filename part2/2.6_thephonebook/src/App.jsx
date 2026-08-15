@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
 import personService from './services/persons'
 import Filter from './components/Filter'
 import Persons from './components/Persons'
@@ -33,9 +32,7 @@ const App = () => {
 
     if (!result) {
 
-    const id = (persons.length + 1).toString()
-    console.log("id:", id);
-    const newPerson = {name: newName, number: newNumber, id: id }
+    const newPerson = {name: newName, number: newNumber}
 
     personService
       .create(newPerson)
@@ -43,12 +40,12 @@ const App = () => {
 
         console.log("response: ", returnedPerson);
 
-        setPersons(persons.concat(newPerson))
+        setPersons(persons.concat(returnedPerson))
         setNewName('')
         setNewNumber('')
-        setSearchResults(persons.concat(newPerson))
+        setSearchResults(persons.concat(returnedPerson))
 
-        console.log(`add new record: ${newName} ${newNumber} with id ${id} `)
+        console.log(`add new record: ${returnedPerson.name} ${returnedPerson.number} with id ${returnedPerson.id} `)
         setNotificationMessage(
           `added: ${newName}`
           )
@@ -57,7 +54,15 @@ const App = () => {
         }, 3000)
       })
       .catch(error => {
-        console.log("error message: ", error);      
+        setOnError(true)
+        setNotificationMessage(
+            error.response.data.error
+          )
+          setTimeout(() => {
+            setNotificationMessage(null)
+            setOnError(false)
+          }, 3000)
+        console.log(error.response.data.error);     
       })
     }   
     else {
@@ -100,11 +105,11 @@ const App = () => {
           })
 
           .catch(error => {
-          console.log("error message: ", error);  
+          console.log(error.response.data.error);  
 
           setOnError(true)
           setNotificationMessage(
-            `${newName} not found on the server`
+            error.response.data.error
           )
           setTimeout(() => {
             setNotificationMessage(null)
