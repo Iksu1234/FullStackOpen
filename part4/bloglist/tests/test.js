@@ -110,7 +110,7 @@ describe('Blogger with most blogs', () => {
       title: 'Go To Statement Considered Harmful',
       author: 'Pekka Eevertti',
       url: 'https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf',
-      likes: 10,
+      likes: 15,
       __v: 0
     },
     {
@@ -118,7 +118,7 @@ describe('Blogger with most blogs', () => {
       title: 'Testiä varten blogi',
       author: 'Ekka Peevertti',
       url: 'https://homepages.cwi.nl/~storm/teaching/reader/juupatijoo.pdf',
-      likes: 15,
+      likes: 20,
       __v: 0
     },
         {
@@ -126,7 +126,7 @@ describe('Blogger with most blogs', () => {
       title: 'Testiä varten blogi',
       author: 'Pekka Eevertti',
       url: 'https://homepages.cwi.nl/~storm/teaching/reader/juupatijuu.pdf',
-      likes: 20,
+      likes: 10,
       __v: 0
     },
     {
@@ -134,7 +134,7 @@ describe('Blogger with most blogs', () => {
       title: 'Blogi blogi',
       author: 'Esko Blogi',
       url: 'https://homepages.cwi.nl/~storm/teaching/reader/juupatijoasd.pdf',
-      likes: 6,
+      likes: 10,
       __v: 0
     }
   ]
@@ -146,6 +146,55 @@ describe('Blogger with most blogs', () => {
 
   test('blogger with most most blogs returned', () => {
     const result = listHelper.mostBlogs(mostBlogsList)
+    assert.deepStrictEqual(result,correctBlogger)
+  })
+
+})
+
+describe('Blog with most likes', () => {
+
+      const mostBlogLikes = [
+     {
+      _id: '5a422aa71b54a676234d17f8',
+      title: 'Go To Statement Considered Harmful',
+      author: 'Pekka Eevertti',
+      url: 'https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf',
+      likes: 15,
+      __v: 0
+    },
+    {
+      _id: '5a422aa71b54a676234d4321',
+      title: 'Testiä varten blogi',
+      author: 'Ekka Peevertti',
+      url: 'https://homepages.cwi.nl/~storm/teaching/reader/juupatijoo.pdf',
+      likes: 20,
+      __v: 0
+    },
+        {
+      _id: '5a422aa71b54a676234d1123',
+      title: 'Testiä varten blogi',
+      author: 'Pekka Eevertti',
+      url: 'https://homepages.cwi.nl/~storm/teaching/reader/juupatijuu.pdf',
+      likes: 10,
+      __v: 0
+    },
+    {
+      _id: '5a422aa71b54a676234d4321',
+      title: 'Blogi blogi',
+      author: 'Esko Blogi',
+      url: 'https://homepages.cwi.nl/~storm/teaching/reader/juupatijoasd.pdf',
+      likes: 10,
+      __v: 0
+    }
+  ]
+  const correctBlogger = 
+  {
+    author: "Pekka Eevertti",
+    likes: 25
+  }
+
+  test('blogger with most likes returned', () => {
+    const result = listHelper.mostLikes(mostBlogLikes)
     assert.deepStrictEqual(result,correctBlogger)
   })
 
