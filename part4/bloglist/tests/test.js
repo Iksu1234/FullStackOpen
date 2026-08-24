@@ -1,6 +1,12 @@
-const { test, describe } = require('node:test')
+const { test, describe,after } = require('node:test')
 const assert = require('node:assert')
+const mongoose = require('mongoose')
+const supertest = require('supertest')
 const listHelper = require('../utils/list_helper')
+const app = require('../app')
+
+const api = supertest(app)
+
 
 test('dummy returns one', () => {
   const blogs = []
@@ -199,3 +205,18 @@ describe('Blog with most likes', () => {
   })
 
 })
+
+describe('Blog with most likes', () => {
+  test.only('correct amount of blogs are returned in the json format', async () => {
+    const response = await api.get('/api/blogs')
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+      assert.strictEqual(response.body.length, 2)
+
+
+  })
+})
+after(async () => {
+  await mongoose.connection.close()
+  })
+
