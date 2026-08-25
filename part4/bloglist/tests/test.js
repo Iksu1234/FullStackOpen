@@ -206,14 +206,19 @@ describe('Blog with most likes', () => {
 
 })
 
-describe('Blog with most likes', () => {
+describe('Blog list database tests', () => {
   test.only('correct amount of blogs are returned in the json format', async () => {
     const response = await api.get('/api/blogs')
       .expect(200)
       .expect('Content-Type', /application\/json/)
       assert.strictEqual(response.body.length, 2)
-
-
+  })
+  test.only('unique identifier property is named "id"', async () => {
+    const response = await api.get('/api/blogs')
+      const object = response.body[0]
+      const keys = Object.keys(object)
+      const result = keys.find((key) => key === 'id')
+      assert.strictEqual(result, 'id')
   })
 })
 after(async () => {
