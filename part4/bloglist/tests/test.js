@@ -1,11 +1,33 @@
-const { test, describe,after } = require('node:test')
+const { test, describe,after, beforeEach } = require('node:test')
 const assert = require('node:assert')
 const mongoose = require('mongoose')
 const supertest = require('supertest')
 const listHelper = require('../utils/list_helper')
 const app = require('../app')
+const Blog = require('../models/blog')
 
 const api = supertest(app)
+
+const initialBlogs = [
+  {
+    title: "Blogi",
+    url: "www.url.com",
+    likes: 100
+  },
+  {
+    title: "Blogi2",
+    url: "www.url.fi",
+    likes: 50
+  },
+]
+
+beforeEach(async () => {
+  await Blog.deleteMany({})
+  let blogObject = new Blog(initialBlogs[0])
+  await blogObject.save()
+  blogObject = new Blog(initialBlogs[1])
+  await blogObject.save()
+})
 
 
 test('dummy returns one', () => {
@@ -207,6 +229,7 @@ describe('Blog with most likes', () => {
 })
 
 describe('Blog list database tests', () => {
+
   test.only('correct amount of blogs are returned in the json format', async () => {
     const response = await api.get('/api/blogs')
       .expect(200)
@@ -220,7 +243,27 @@ describe('Blog list database tests', () => {
       const result = keys.find((key) => key === 'id')
       assert.strictEqual(result, 'id')
   })
+  test.only('making an HTTP POST request to the /api/blogs URL successfully creates a new blog post', async () => {
+    const newBlog =   
+    {
+    title: "Blogi3",
+    url: "www.url.org",
+    likes: 150
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+
+    const response = await api.get('/api/blogs')
+    const titles = response.body.map(r => r.title)
+    assert.strictEqual(response.body.length, initialBlogs.length + 1)
+    assert(titles.includes('Blogi3'))
+  })
 })
+
 after(async () => {
   await mongoose.connection.close()
   })
