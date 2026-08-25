@@ -37,6 +37,7 @@ test('dummy returns one', () => {
   assert.strictEqual(result, 1)
 })
 
+describe('list_helper tests', () => {
 describe('total likes', () => {
   const listWithNoBlogs = []
   const listWithOneBlog = [
@@ -226,7 +227,7 @@ describe('Blog with most likes', () => {
     assert.deepStrictEqual(result,correctBlogger)
   })
 
-})
+})})
 
 describe('Blog list database tests', () => {
 
@@ -316,6 +317,22 @@ describe('Blog list database tests', () => {
       .expect('Content-Type', /application\/json/)
       assert.strictEqual(response.body.length, 2)
   })
+
+describe ('HTTP DELETE tests',() => {
+
+  test.only('Returns 204 if successful', async () => {
+    const getResponse = await api.get('/api/blogs')
+    const idToDelete = getResponse.body[1].id
+
+    await api.del(`/api/blogs/${idToDelete}`)
+      .expect(204)
+  })
+  test.only('Returns 404 if unsuccessful', async () => {
+    const id = "123412341234123412341234"
+    await api.del(`/api/blogs/${id}`)
+      .expect(404)
+  })
+})
 })
 
 after(async () => {
