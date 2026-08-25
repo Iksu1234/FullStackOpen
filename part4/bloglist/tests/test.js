@@ -327,12 +327,51 @@ describe ('HTTP DELETE tests',() => {
     await api.del(`/api/blogs/${idToDelete}`)
       .expect(204)
   })
-  test.only('Returns 404 if unsuccessful', async () => {
+  test.only('Returns 404 if id not found', async () => {
     const id = "123412341234123412341234"
     await api.del(`/api/blogs/${id}`)
       .expect(404)
   })
 })
+})
+
+describe ('HTTP PUT tests',() => {
+
+    const updateBlog =   
+    {
+      likes: 90
+    }
+
+  test.only('Returns 200 if successful', async () => {
+
+    const getResponse = await api.get('/api/blogs')
+    const idToUpdate = getResponse.body[1].id
+
+    await api
+      .put(`/api/blogs/${idToUpdate}`)
+      .send(updateBlog)
+      .expect(200)
+  })
+
+  test.only('Returns 404 if id not found', async () => {
+
+    const id = "123412341234123412341234"
+    await api
+      .put(`/api/blogs/${id}`)
+      .send(updateBlog)
+      .expect(404)
+  })
+  
+  test.only('database updated with the correct value', async () => {
+
+    const getResponse = await api.get('/api/blogs')
+    const idToUpdate = getResponse.body[1].id
+
+    const response = await api
+      .put(`/api/blogs/${idToUpdate}`)
+      .send(updateBlog)
+      assert.strictEqual(response.body.likes, updateBlog.likes)
+  })
 })
 
 after(async () => {
