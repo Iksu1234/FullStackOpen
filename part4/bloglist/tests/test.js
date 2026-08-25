@@ -262,6 +262,24 @@ describe('Blog list database tests', () => {
     assert.strictEqual(response.body.length, initialBlogs.length + 1)
     assert(titles.includes('Blogi3'))
   })
+  test.only('if the likes property is missing from HTTP POST, defaults to 0', async () => {
+        const newBlog =   
+        {
+          title: "Blogi no likes",
+          url: "www.url.swe"
+        }
+
+      await api
+        .post('/api/blogs')
+        .send(newBlog)
+        .expect(201)
+        .expect('Content-Type', /application\/json/)
+
+    const response = await api.get('/api/blogs')
+    const likesArray = response.body.map(r => r.likes)
+    assert.strictEqual(response.body.length, initialBlogs.length + 1)
+    assert(likesArray.includes(0))
+  })
 })
 
 after(async () => {
