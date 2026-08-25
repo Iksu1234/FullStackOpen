@@ -280,6 +280,42 @@ describe('Blog list database tests', () => {
     assert.strictEqual(response.body.length, initialBlogs.length + 1)
     assert(likesArray.includes(0))
   })
+  test.only('if the url is missing from the request data, the backend responds to the request with the status code 400 Bad Request.',
+    async () => {
+      const newBlog =   
+        {
+          title: "Blogi no url",
+          likes: 3
+        }
+
+      await api
+        .post('/api/blogs')
+        .send(newBlog)
+        .expect(400)
+
+    const response = await api.get('/api/blogs')
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+      assert.strictEqual(response.body.length, 2)
+  })
+  test.only('if the title is missing from the request data, the backend responds to the request with the status code 400 Bad Request.',
+    async () => {
+      const newBlog =   
+        {
+          url: "www.noTitle.com",
+          likes: 3
+        }
+
+      await api
+        .post('/api/blogs')
+        .send(newBlog)
+        .expect(400)
+
+    const response = await api.get('/api/blogs')
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+      assert.strictEqual(response.body.length, 2)
+  })
 })
 
 after(async () => {
