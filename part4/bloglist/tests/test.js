@@ -1,10 +1,13 @@
 const { test, describe,after, beforeEach } = require('node:test')
+const bcrypt = require('bcrypt')
 const assert = require('node:assert')
 const mongoose = require('mongoose')
 const supertest = require('supertest')
 const listHelper = require('../utils/list_helper')
+const testHelper = require('../utils/test_helper')
 const app = require('../app')
 const Blog = require('../models/blog')
+const User = require('../models/user')
 
 const api = supertest(app)
 
@@ -28,7 +31,6 @@ beforeEach(async () => {
   blogObject = new Blog(initialBlogs[1])
   await blogObject.save()
 })
-
 
 test('dummy returns one', () => {
   const blogs = []
@@ -74,7 +76,7 @@ describe('total likes', () => {
     assert.strictEqual(result, 0)
   })
 
-  test('when list has only one blog, equals the likes of that', () => {
+  test('when list has one blog, equals the likes of that', () => {
     const result = listHelper.totalLikes(listWithOneBlog)
     assert.strictEqual(result, 5)
   })
@@ -231,20 +233,20 @@ describe('Blog with most likes', () => {
 
 describe('Blog list database tests', () => {
 
-  test.only('correct amount of blogs are returned in the json format', async () => {
+  test('correct amount of blogs are returned in the json format', async () => {
     const response = await api.get('/api/blogs')
       .expect(200)
       .expect('Content-Type', /application\/json/)
       assert.strictEqual(response.body.length, 2)
   })
-  test.only('unique identifier property is named "id"', async () => {
+  test('unique identifier property is named "id"', async () => {
     const response = await api.get('/api/blogs')
       const object = response.body[0]
       const keys = Object.keys(object)
       const result = keys.find((key) => key === 'id')
       assert.strictEqual(result, 'id')
   })
-  test.only('making an HTTP POST request to the /api/blogs URL successfully creates a new blog post', async () => {
+  test('making an HTTP POST request to the /api/blogs URL successfully creates a new blog post', async () => {
     const newBlog =   
     {
     title: "Blogi3",
@@ -263,7 +265,7 @@ describe('Blog list database tests', () => {
     assert.strictEqual(response.body.length, initialBlogs.length + 1)
     assert(titles.includes('Blogi3'))
   })
-  test.only('if the likes property is missing from HTTP POST, defaults to 0', async () => {
+  test('if the likes property is missing from HTTP POST, defaults to 0', async () => {
         const newBlog =   
         {
           title: "Blogi no likes",
@@ -281,7 +283,7 @@ describe('Blog list database tests', () => {
     assert.strictEqual(response.body.length, initialBlogs.length + 1)
     assert(likesArray.includes(0))
   })
-  test.only('if the url is missing from the request data, the backend responds to the request with the status code 400 Bad Request.',
+  test('if the url is missing from the request data, the backend responds to the request with the status code 400 Bad Request.',
     async () => {
       const newBlog =   
         {
@@ -299,7 +301,7 @@ describe('Blog list database tests', () => {
       .expect('Content-Type', /application\/json/)
       assert.strictEqual(response.body.length, 2)
   })
-  test.only('if the title is missing from the request data, the backend responds to the request with the status code 400 Bad Request.',
+  test('if the title is missing from the request data, the backend responds to the request with the status code 400 Bad Request.',
     async () => {
       const newBlog =   
         {
@@ -320,14 +322,14 @@ describe('Blog list database tests', () => {
 
 describe ('HTTP DELETE tests',() => {
 
-  test.only('Returns 204 if successful', async () => {
+  test('Returns 204 if successful', async () => {
     const getResponse = await api.get('/api/blogs')
     const idToDelete = getResponse.body[1].id
 
     await api.del(`/api/blogs/${idToDelete}`)
       .expect(204)
   })
-  test.only('Returns 404 if id not found', async () => {
+  test('Returns 404 if id not found', async () => {
     const id = "123412341234123412341234"
     await api.del(`/api/blogs/${id}`)
       .expect(404)
@@ -342,7 +344,7 @@ describe ('HTTP PUT tests',() => {
       likes: 90
     }
 
-  test.only('Returns 200 if successful', async () => {
+  test('Returns 200 if successful', async () => {
 
     const getResponse = await api.get('/api/blogs')
     const idToUpdate = getResponse.body[1].id
@@ -353,7 +355,7 @@ describe ('HTTP PUT tests',() => {
       .expect(200)
   })
 
-  test.only('Returns 404 if id not found', async () => {
+  test('Returns 404 if id not found', async () => {
 
     const id = "123412341234123412341234"
     await api
@@ -362,7 +364,7 @@ describe ('HTTP PUT tests',() => {
       .expect(404)
   })
   
-  test.only('database updated with the correct value', async () => {
+  test('database updated with the correct value', async () => {
 
     const getResponse = await api.get('/api/blogs')
     const idToUpdate = getResponse.body[1].id
@@ -374,7 +376,61 @@ describe ('HTTP PUT tests',() => {
   })
 })
 
-after(async () => {
-  await mongoose.connection.close()
+describe('User tests', () => {
+  beforeEach(async () => {
+    await User.deleteMany({})
+
+    const passwordHash = await bcrypt.hash('secret', 10 )
+    const user = new User({ username: 'root', passwordHash})
+    
+    await user.save()
   })
 
+  test.only('creation succeeds with a fresh username', async () => {
+    const usersAtStart =  await testHelper.usersInDb()
+
+    const newUser = {
+      username: 'pekkaE',
+      name: 'Pekka Eevert',
+      password: 'salasana',
+    }
+
+    await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+
+    const usersAtEnd = await testHelper.usersInDb()
+    assert.strictEqual(usersAtEnd.length, usersAtStart.length + 1)
+
+    const usernames = usersAtEnd.map(u => u.username)
+    assert(usernames.includes(newUser.username))
+  })
+
+  test.only('creation fails with proper statuscode and message if username already taken', async () => {
+    const usersAtStart = await testHelper.usersInDb()
+
+    const newUser = {
+      username: 'root',
+      name: 'Superuser',
+      password: 'salainen',
+    }
+
+    const result = await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(400)
+      .expect('Content-Type', /application\/json/)
+
+    const usersAtEnd = await testHelper.usersInDb()
+    assert(result.body.error.includes('expected `username` to be unique'))
+
+    assert.strictEqual(usersAtEnd.length, usersAtStart.length)
+  })
+    
+})
+
+after(async () => {
+  await mongoose.connection.close()
+})
