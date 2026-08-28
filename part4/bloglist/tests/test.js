@@ -14,11 +14,13 @@ const api = supertest(app)
 const initialBlogs = [
   {
     title: "Blogi",
+    author: "testi eevertti",
     url: "www.url.com",
     likes: 100
   },
   {
     title: "Blogi2",
+    author: "testi eevertti",
     url: "www.url.fi",
     likes: 50
   },
@@ -247,11 +249,17 @@ describe('Blog list database tests', () => {
       assert.strictEqual(result, 'id')
   })
   test('making an HTTP POST request to the /api/blogs URL successfully creates a new blog post', async () => {
-    const newBlog =   
+    
+    const testUser = await testHelper.usersInDb()
+    const testUserId = testUser[0].id
+    
+    const newBlog =
     {
     title: "Blogi3",
+    author: "testi eevertti",
     url: "www.url.org",
     likes: 150
+    //userId: `${testUserId}`
     }
 
     await api
@@ -386,7 +394,7 @@ describe('User tests', () => {
     await user.save()
   })
 
-  test.only('creation succeeds with a fresh username', async () => {
+  test('creation succeeds with a fresh username', async () => {
     const usersAtStart =  await testHelper.usersInDb()
 
     const newUser = {
@@ -408,7 +416,7 @@ describe('User tests', () => {
     assert(usernames.includes(newUser.username))
   })
 
-  test.only('creation fails with proper statuscode and message if username already taken', async () => {
+  test('creation fails with proper statuscode and message if username already taken', async () => {
     const usersAtStart = await testHelper.usersInDb()
 
     const newUser = {
@@ -429,7 +437,7 @@ describe('User tests', () => {
     assert.strictEqual(usersAtEnd.length, usersAtStart.length)
   })
 
-    test.only('username cannot be less than 3 characters', async () => {
+    test('username cannot be less than 3 characters', async () => {
     const usersAtStart = await testHelper.usersInDb()
 
     const newUser = {
@@ -450,7 +458,7 @@ describe('User tests', () => {
     assert.strictEqual(usersAtEnd.length, usersAtStart.length)
   })
 
-   test.only('username must be given in request', async () => {
+   test('username must be given in request', async () => {
     const usersAtStart = await testHelper.usersInDb()
 
     const newUser = {
@@ -470,7 +478,7 @@ describe('User tests', () => {
     assert.strictEqual(usersAtEnd.length, usersAtStart.length)
   })
 
-   test.only('password cannot be less than 3 characters', async () => {
+   test('password cannot be less than 3 characters', async () => {
     const usersAtStart = await testHelper.usersInDb()
 
     const newUser = {
@@ -491,7 +499,7 @@ describe('User tests', () => {
     assert.strictEqual(usersAtEnd.length, usersAtStart.length)
   })
 
-  test.only('password must be given in request', async () => {
+  test('password must be given in request', async () => {
     const usersAtStart = await testHelper.usersInDb()
 
     const newUser = {
